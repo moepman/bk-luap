@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link href="static/css/style.css" type="text/css" rel="stylesheet">
+	<title>Binary Kitchen: LDAP User Administration Portal</title>
+</head>
+<body>
+	<header>
+		<img src="static/img/binary_kitchen.svg" alt="Binary Kitchen">
+		<h1>User Self-Service Portal</h1>
+	</header>
+	<nav>
+		{% block navigation %}
+		{% endblock %}
+	</nav>
+	<main>
+		{% block content %}
+		{% endblock %}
+	</main>
+	<footer>
+		<p>Binary Kitchen: LDAP User Administration Portal, <a href="https://github.com/moepman/bk-luap">source code</a> under MIT license.</p>
+	</footer>
+</body>
+</html>
