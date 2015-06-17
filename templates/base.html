@@ -12,8 +12,11 @@
 		<h1>LDAP User Administration Portal</h1>
 	</header>
 	<nav>
-		{% block navigation %}
-		{% endblock %}
+		<ul>
+			{% for ni in nav %}
+			<li><a href="{{ url_for(ni) }}">{{ ni|capitalize }}</a></li>
+			{% endfor %}
+		</ul>
 	</nav>
 	<main>
 		{% block content %}

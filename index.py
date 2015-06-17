@@ -24,11 +24,18 @@ class LoginForm(Form):
 
 @app.route('/')
 def index():
-	return render_template('index.html')
+	nav = None
+	if 'uuid' in session:
+		nav = ['logout']
+	else:
+		nav = ['login']
+
+	return render_template('index.html', nav=nav)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	nav = ['login']
 	form = LoginForm()
 
 	if form.validate_on_submit():
@@ -40,7 +47,7 @@ def login():
 		except ldap.INVALID_CREDENTIALS as e:
 			form.pswd.errors.append(e.message['desc'])
 			l.unbind_s()
-			return render_template('login.html', form=form)
+			return render_template('login.html', form=form, nav=nav)
 		l.unbind_s()
 
 		session['uuid'] = str(uuid.uuid4())
@@ -50,12 +57,14 @@ def login():
 		rdb.expire(session['uuid'], 3600)
 
 		return redirect(url_for('index'))
-	return render_template('login.html', form=form)
+	return render_template('login.html', form=form, nav=nav)
 
 
 @app.route('/logout')
 def logout():
-	session['uuid'] = None
+	if 'uuid' in session:
+		rdb.delete(session['uuid'])
+	del session['uuid']
 	return redirect(url_for('index'))
 
 
