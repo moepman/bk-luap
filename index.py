@@ -16,6 +16,16 @@ app.jinja_env.lstrip_blocks = True
 rdb = Redis(host=app.config.get('REDIS_HOST', '127.0.0.1'), password=app.config.get('REDIS_PSWD'))
 
 
+class ReadonlyStringField(StringField):
+	def __call__(self, *args, **kwargs):
+		kwargs.setdefault('readonly', True)
+		return super(ReadonlyStringField, self).__call__(*args, **kwargs)
+
+class EditForm(Form):
+	user = ReadonlyStringField('Username')
+	pswd = PasswordField('Password')
+	submit = SubmitField('Submit')
+
 class LoginForm(Form):
 	user = StringField('Username', validators=[Required()])
 	pswd = PasswordField('Password', validators=[Required()])
@@ -26,12 +36,23 @@ class LoginForm(Form):
 def index():
 	nav = None
 	if 'uuid' in session:
-		nav = ['logout']
+		nav = ['edit', 'logout']
 	else:
 		nav = ['login']
 
 	return render_template('index.html', nav=nav)
 
+
+@app.route('/edit', methods=['GET', 'POST'])
+def edit():
+	if 'uuid' not in session:
+		return redirect(url_for('index'))
+
+	nav = ['edit', 'logout']
+	form = EditForm()
+	user = rdb.hgetall(session['uuid'])['user']
+	form.user.data = user
+	return render_template('edit.html', form=form, nav=nav)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -64,7 +85,7 @@ def login():
 def logout():
 	if 'uuid' in session:
 		rdb.delete(session['uuid'])
-	del session['uuid']
+		del session['uuid']
 	return redirect(url_for('index'))
 
 

@@ -1,0 +1,10 @@
+{% from "_helpers.html" import render_field %}
+{% extends "base.html" %}
+{% block content %}
+		<form method="POST">
+		{{ form.hidden_tag() }}
+		{{ render_field(form.user) }}
+		{{ render_field(form.pswd) }}
+		<div class="form-group">{{ form.submit(class_="btn btn-default") }}</div>
+		</form>
+{% endblock %}
