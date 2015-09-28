@@ -50,9 +50,26 @@ def edit():
 
 	nav = ['edit', 'logout']
 	form = EditForm()
-	user = rdb.hgetall(session['uuid'])['user']
+	user = rdb.hget(session['uuid'], 'user')
+
+	if form.validate_on_submit():
+		opwd = rdb.hget(session['uuid'], 'pswd')
+		pswd = form.pswd.data
+		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+		try:
+			l.simple_bind_s(user, opwd)
+			l.passwd_s(user, opwd, pswd)
+		except ldap.INVALID_CREDENTIALS as e:
+			# TODO error message
+			l.unbind_s()
+		else:
+			rdb.hset(session'uuid'], 'pswd', pswd)
+		# TODO show a success message
+		return redirect(url_for('index'))
+
 	form.user.data = user
 	return render_template('edit.html', form=form, nav=nav)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -74,8 +91,8 @@ def login():
 		session['uuid'] = str(uuid.uuid4())
 		credentials = { 'user': user, 'pswd': pswd }
 		rdb.hmset(session['uuid'], credentials)
-		# TODO refactor this are reuse, make session timeout a config variable
-		rdb.expire(session['uuid'], 3600)
+		# TODO refactor this and reuse
+		rdb.expire(session['uuid'], app.config.get('SESSION_TIMEOUT', 3600))
 
 		return redirect(url_for('index'))
 	return render_template('login.html', form=form, nav=nav)
