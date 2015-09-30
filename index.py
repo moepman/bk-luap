@@ -54,17 +54,17 @@ def edit():
 
 	if form.validate_on_submit():
 		opwd = rdb.hget(session['uuid'], 'pswd')
-		pswd = form.pswd.data
+		npwd = form.pswd.data
 		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
 		try:
 			l.simple_bind_s(user, opwd)
-			l.passwd_s(user, opwd, pswd)
+			l.passwd_s(user, opwd, npwd)
 		except ldap.INVALID_CREDENTIALS as e:
-			# TODO error message
+			# TODO display error message
 			l.unbind_s()
 		else:
 			rdb.hset(session['uuid'], 'pswd', pswd)
-		# TODO show a success message
+			# TODO display success message
 		return redirect(url_for('index'))
 
 	form.user.data = user
