@@ -32,10 +32,14 @@ class LoginForm(Form):
 	submit = SubmitField('Login')
 
 
+def isLoggedin():
+	return 'uuid' in session and rdb.exists(session['uuid'])
+
+
 @app.route('/')
 def index():
 	nav = None
-	if 'uuid' in session and rdb.exists(session['uuid']):
+	if isLoggedin():
 		nav = ['edit', 'logout']
 	else:
 		nav = ['login']
@@ -45,7 +49,7 @@ def index():
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
-	if 'uuid' not in session or not rdb.exists(session['uuid']):
+	if not isLoggedin():
 		return redirect(url_for('index'))
 
 	nav = ['edit', 'logout']
