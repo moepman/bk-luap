@@ -23,7 +23,8 @@ class ReadonlyStringField(StringField):
 
 class EditForm(Form):
 	user = ReadonlyStringField('Username')
-	pswd = PasswordField('Password')
+	pwd1 = PasswordField('Password')
+	pwd2 = PasswordField('Password (repeat)')
 	submit = SubmitField('Submit')
 
 class LoginForm(Form):
@@ -50,26 +51,32 @@ def index():
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
 	if not isLoggedin():
-		return redirect(url_for('index'))
+		nav = ['login']
+		return render_template('error.html', message="You are not logged in. Please log in first.", nav=nav)
 
 	nav = ['edit', 'logout']
 	form = EditForm()
 	user = rdb.hget(session['uuid'], 'user')
 
 	if form.validate_on_submit():
-		opwd = rdb.hget(session['uuid'], 'pswd')
-		npwd = form.pswd.data
-		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
-		try:
-			l.simple_bind_s(user, opwd)
-			l.passwd_s(user, opwd, npwd)
-		except ldap.INVALID_CREDENTIALS as e:
-			# TODO display error message
-			l.unbind_s()
+		if form.pwd1.data != form.pwd2.data:
+			form.pwd1.errors.append("Passwords do not match.")
+			form.pwd2.errors.append("Passwords do not match.")
 		else:
-			rdb.hset(session['uuid'], 'pswd', pswd)
-			# TODO display success message
-		return redirect(url_for('index'))
+			opwd = rdb.hget(session['uuid'], 'pswd')
+			npwd = form.pwd1.data
+			l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+			try:
+				l.simple_bind_s(user, opwd)
+				l.passwd_s(user, opwd, npwd)
+			except ldap.INVALID_CREDENTIALS as e:
+				# TODO display error message
+				l.unbind_s()
+			else:
+				# TODO display success message
+				rdb.hset(session['uuid'], 'pswd', npwd)
+				l.unbind_s()
+			return redirect(url_for('index'))
 
 	form.user.data = user
 	return render_template('edit.html', form=form, nav=nav)

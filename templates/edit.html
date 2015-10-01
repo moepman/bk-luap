@@ -4,7 +4,8 @@
 		<form method="POST">
 		{{ form.hidden_tag() }}
 		{{ render_field(form.user) }}
-		{{ render_field(form.pswd) }}
+		{{ render_field(form.pwd1) }}
+		{{ render_field(form.pwd2) }}
 		<div class="form-group">{{ form.submit(class_="btn btn-default") }}</div>
 		</form>
 {% endblock %}
