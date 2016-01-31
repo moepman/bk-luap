@@ -23,8 +23,8 @@ class ReadonlyStringField(StringField):
 
 class EditForm(Form):
 	user = ReadonlyStringField('Username')
-	pwd1 = PasswordField('Password')
-	pwd2 = PasswordField('Password (repeat)')
+	pwd1 = PasswordField('New Password')
+	pwd2 = PasswordField('New Password (repeat)')
 	submit = SubmitField('Submit')
 
 class LoginForm(Form):
@@ -60,7 +60,6 @@ def edit():
 
 	if form.validate_on_submit():
 		if form.pwd1.data != form.pwd2.data:
-			form.pwd1.errors.append("Passwords do not match.")
 			form.pwd2.errors.append("Passwords do not match.")
 		else:
 			opwd = rdb.hget(session['uuid'], 'pswd')
@@ -70,13 +69,14 @@ def edit():
 				l.simple_bind_s(user, opwd)
 				l.passwd_s(user, opwd, npwd)
 			except ldap.INVALID_CREDENTIALS as e:
-				# TODO display error message
+				form.user.errors.append(e.message['desc'])
 				l.unbind_s()
+				return render_template('edit.html', form=form, nav=nav)
 			else:
 				# TODO display success message
 				rdb.hset(session['uuid'], 'pswd', npwd)
 				l.unbind_s()
-			return redirect(url_for('index'))
+				return redirect(url_for('index'))
 
 	form.user.data = user
 	return render_template('edit.html', form=form, nav=nav)
