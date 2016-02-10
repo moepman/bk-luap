@@ -5,7 +5,7 @@ from flask_wtf import Form
 import ldap
 from redis import Redis
 import uuid
-from wtforms.fields import PasswordField, SelectField, StringField, SubmitField
+from wtforms.fields import IntegerField, PasswordField, SelectField, StringField, SubmitField
 from wtforms.validators import EqualTo, Required
 
 app = Flask(__name__)
@@ -21,6 +21,15 @@ class ReadonlyStringField(StringField):
 		kwargs.setdefault('readonly', True)
 		return super(ReadonlyStringField, self).__call__(*args, **kwargs)
 
+class CreateForm(Form):
+	user = StringField('Username', validators = [Required()])
+	uid = IntegerField('User ID', validators = [Required()])
+	gn = StringField('Given Name', validators = [Required()])
+	sn = StringField('Family Name', validators = [Required()])
+	pwd1 = PasswordField('Password', validators = [Required()])
+	pwd2 = PasswordField('Password (repeat)', validators = [Required(), EqualTo('pwd1', "Passwords must match")])
+	submit = SubmitField('Submit')
+
 class EditForm(Form):
 	user = ReadonlyStringField('Username')
 	pwd1 = PasswordField('New Password', validators = [Required()])
@@ -33,6 +42,9 @@ class LoginForm(Form):
 	submit = SubmitField('Login')
 
 
+def isAdmin():
+	return isLoggedin() and rdb.hget(session['uuid'], 'user') in app.config.get('ADMINS', [])
+
 def isLoggedin():
 	return 'uuid' in session and rdb.exists(session['uuid'])
 
@@ -41,6 +53,8 @@ def buildNav():
 	nav = []
 	if isLoggedin():
 		nav.append('edit')
+		if isAdmin():
+			nav.append('create')
 		nav.append('logout')
 	else:
 		nav.append('login')
@@ -51,6 +65,29 @@ def buildNav():
 def index():
 
 	return render_template('index.html', nav=buildNav())
+
+
+@app.route('/create', methods=['GET', 'POST'])
+def create():
+	if not isLoggedin():
+		return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
+
+	form = CreateForm()
+
+	if form.validate_on_submit():
+		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+		try:
+			l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
+			# TODO implement
+			#l.add_s()
+		except:
+			l.unbind_s()
+		else:
+			# TODO display success message
+			l.unbind_s()
+			pass
+
+	return render_template('create.html', form=form, nav=buildNav())
 
 
 @app.route('/edit', methods=['GET', 'POST'])

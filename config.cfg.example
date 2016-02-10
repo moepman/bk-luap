@@ -5,5 +5,7 @@ SESSION_TIMEOUT = 3600
 LDAP_URI = "ldaps://ldap.example.com"
 LDAP_BASE = "ou=people,dc=example,dc=com"
 
+ADMINS = [ "cn=admin,ou=people,dc=example,dc=com" ]
+
 REDIS_HOST = "127.0.0.1"
 REDIS_PSWD = "foobared"
