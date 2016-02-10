@@ -23,8 +23,8 @@ class ReadonlyStringField(StringField):
 
 class EditForm(Form):
 	user = ReadonlyStringField('Username')
-	pwd1 = PasswordField('New Password')
-	pwd2 = PasswordField('New Password (repeat)')
+	pwd1 = PasswordField('New Password', validators = [Required()])
+	pwd2 = PasswordField('New Password (repeat)', validators = [Required(), EqualTo('pwd1', "Passwords must match")])
 	submit = SubmitField('Submit')
 
 class LoginForm(Form):
@@ -59,24 +59,21 @@ def edit():
 	user = rdb.hget(session['uuid'], 'user')
 
 	if form.validate_on_submit():
-		if form.pwd1.data != form.pwd2.data:
-			form.pwd2.errors.append("Passwords do not match.")
+		opwd = rdb.hget(session['uuid'], 'pswd')
+		npwd = form.pwd1.data
+		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+		try:
+			l.simple_bind_s(user, opwd)
+			l.passwd_s(user, opwd, npwd)
+		except ldap.INVALID_CREDENTIALS as e:
+			form.user.errors.append(e.message['desc'])
+			l.unbind_s()
+			return render_template('edit.html', form=form, nav=nav)
 		else:
-			opwd = rdb.hget(session['uuid'], 'pswd')
-			npwd = form.pwd1.data
-			l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
-			try:
-				l.simple_bind_s(user, opwd)
-				l.passwd_s(user, opwd, npwd)
-			except ldap.INVALID_CREDENTIALS as e:
-				form.user.errors.append(e.message['desc'])
-				l.unbind_s()
-				return render_template('edit.html', form=form, nav=nav)
-			else:
-				# TODO display success message
-				rdb.hset(session['uuid'], 'pswd', npwd)
-				l.unbind_s()
-				return redirect(url_for('index'))
+			# TODO display success message
+			rdb.hset(session['uuid'], 'pswd', npwd)
+			l.unbind_s()
+			return redirect(url_for('index'))
 
 	form.user.data = user
 	return render_template('edit.html', form=form, nav=nav)
