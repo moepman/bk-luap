@@ -1,4 +1,4 @@
-# Binary Kitchen: LDAP User Administration Portal
+# Binary Kitchen: Directory Self-Service
 
 ## Overview
 
