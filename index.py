@@ -6,7 +6,7 @@ import ldap
 from redis import Redis
 import uuid
 from wtforms.fields import PasswordField, SelectField, StringField, SubmitField
-from wtforms.validators import Required
+from wtforms.validators import EqualTo, Required
 
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
@@ -37,24 +37,27 @@ def isLoggedin():
 	return 'uuid' in session and rdb.exists(session['uuid'])
 
 
+def buildNav():
+	nav = []
+	if isLoggedin():
+		nav.append('edit')
+		nav.append('logout')
+	else:
+		nav.append('login')
+	return nav
+
+
 @app.route('/')
 def index():
-	nav = None
-	if isLoggedin():
-		nav = ['edit', 'logout']
-	else:
-		nav = ['login']
 
-	return render_template('index.html', nav=nav)
+	return render_template('index.html', nav=buildNav())
 
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
 	if not isLoggedin():
-		nav = ['login']
-		return render_template('error.html', message="You are not logged in. Please log in first.", nav=nav)
+		return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
 
-	nav = ['edit', 'logout']
 	form = EditForm()
 	user = rdb.hget(session['uuid'], 'user')
 
@@ -68,7 +71,7 @@ def edit():
 		except ldap.INVALID_CREDENTIALS as e:
 			form.user.errors.append(e.message['desc'])
 			l.unbind_s()
-			return render_template('edit.html', form=form, nav=nav)
+			return render_template('edit.html', form=form, nav=buildNav())
 		else:
 			# TODO display success message
 			rdb.hset(session['uuid'], 'pswd', npwd)
@@ -76,12 +79,11 @@ def edit():
 			return redirect(url_for('index'))
 
 	form.user.data = user
-	return render_template('edit.html', form=form, nav=nav)
+	return render_template('edit.html', form=form, nav=buildNav())
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-	nav = ['login']
 	form = LoginForm()
 
 	if form.validate_on_submit():
@@ -93,7 +95,7 @@ def login():
 		except ldap.INVALID_CREDENTIALS as e:
 			form.pswd.errors.append(e.message['desc'])
 			l.unbind_s()
-			return render_template('login.html', form=form, nav=nav)
+			return render_template('login.html', form=form, nav=buildNav())
 		l.unbind_s()
 
 		session['uuid'] = str(uuid.uuid4())
@@ -103,7 +105,7 @@ def login():
 		rdb.expire(session['uuid'], app.config.get('SESSION_TIMEOUT', 3600))
 
 		return redirect(url_for('index'))
-	return render_template('login.html', form=form, nav=nav)
+	return render_template('login.html', form=form, nav=buildNav())
 
 
 @app.route('/logout')
