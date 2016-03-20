@@ -96,9 +96,11 @@ def create():
 			l.add_s(dn, ldap.modlist.addModlist(attrs))
 		except:
 			l.unbind_s()
+			# TODO better message
+			return render_template('error.html', message="Something went wrong.", nav=buildNav())
 		else:
-			# TODO display success message
 			l.unbind_s()
+			return render_template('success.html', message="User successfully created.", nav=buildNav())
 
 	return render_template('create.html', form=form, nav=buildNav())
 
@@ -123,10 +125,9 @@ def edit():
 			l.unbind_s()
 			return render_template('edit.html', form=form, nav=buildNav())
 		else:
-			# TODO display success message
 			rdb.hset(session['uuid'], 'pswd', npwd)
 			l.unbind_s()
-			return redirect(url_for('index'))
+			return render_template('success.html', message="User successfully edited.", nav=buildNav())
 
 	form.user.data = user
 	return render_template('edit.html', form=form, nav=buildNav())
