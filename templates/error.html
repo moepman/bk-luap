@@ -1,4 +1,6 @@
-{% extends "base.html" %}
+{% extends "_base.html" %}
 {% block content %}
-		<p>Error: {{ message }}</p>
+      <div class="alert alert-danger" role="alert">
+        <p>Error: {{ message }}</p>
+      </div>
 {% endblock %}
