@@ -78,14 +78,27 @@ def create():
 		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
 		try:
 			l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
-			# TODO implement
-			#l.add_s()
+			d = {
+				'user' : form.user.data,
+				'uid' : form.uid.data,
+				'gn' : form.gn.data,
+				'sn' : form.sn.data,
+			}
+			dn = app.config.get('CREATE_DN').format(d)
+			attrs = {}
+			for k,v in app.config.get('CREATE_ATTRS'):
+				if isinstance(v, string):
+					attrs[k] = v.format(d)
+				elif isinstance(v, list):
+					attrs[k] = []
+					for e in v:
+						attrs[k].append(v.format(d))
+			l.add_s(dn, ldap.modlist.addModlist(attrs))
 		except:
 			l.unbind_s()
 		else:
 			# TODO display success message
 			l.unbind_s()
-			pass
 
 	return render_template('create.html', form=form, nav=buildNav())
 

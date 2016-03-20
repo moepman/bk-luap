@@ -7,5 +7,17 @@ LDAP_BASE = "ou=people,dc=example,dc=com"
 
 ADMINS = [ "cn=admin,ou=people,dc=example,dc=com" ]
 
+CREATE_DN = "cn={user},ou=people,dc=example,dc=com"
+CREATE_ATTRS = {
+	'objectClass' : ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount'],
+	'cn' : '{user}',
+	'givenName' : '{gn}',
+	'homeDirectory' : '/home/{user}',
+	'loginShell' : '/bin/bash',
+	'sn' : '{sn}',
+	'uid' : '{user}',
+	'uidNumber' : '{uid}'
+}
+
 REDIS_HOST = "127.0.0.1"
 REDIS_PSWD = "foobared"
