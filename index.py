@@ -3,6 +3,7 @@
 from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf import Form
 import ldap
+import ldap.modlist
 from redis import Redis
 import uuid
 from wtforms.fields import IntegerField, PasswordField, SelectField, StringField, SubmitField
@@ -84,20 +85,19 @@ def create():
 				'gn' : form.gn.data,
 				'sn' : form.sn.data,
 			}
-			dn = app.config.get('CREATE_DN').format(d)
+			dn = app.config.get('CREATE_DN').format(**d)
 			attrs = {}
-			for k,v in app.config.get('CREATE_ATTRS'):
-				if isinstance(v, string):
-					attrs[k] = v.format(d)
+			for k,v in app.config.get('CREATE_ATTRS').iteritems():
+				if type(v) == str:
+					attrs[k] = v.format(**d)
 				elif isinstance(v, list):
 					attrs[k] = []
 					for e in v:
-						attrs[k].append(v.format(d))
+						attrs[k].append(e.format(**d))
 			l.add_s(dn, ldap.modlist.addModlist(attrs))
-		except:
+		except ldap.LDAPError as e:
 			l.unbind_s()
-			# TODO better message
-			return render_template('error.html', message="Something went wrong.", nav=buildNav())
+			return render_template('error.html', message=e.message['desc'] + ": " + e.message['info'], nav=buildNav())
 		else:
 			l.unbind_s()
 			return render_template('success.html', message="User successfully created.", nav=buildNav())

@@ -16,7 +16,8 @@ CREATE_ATTRS = {
 	'loginShell' : '/bin/bash',
 	'sn' : '{sn}',
 	'uid' : '{user}',
-	'uidNumber' : '{uid}'
+	'uidNumber' : '{uid}',
+	'gidNumber' : '1000'
 }
 
 REDIS_HOST = "127.0.0.1"
