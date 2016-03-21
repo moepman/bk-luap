@@ -3,11 +3,12 @@ SECRET_KEY = "CHANGE!ME"
 SESSION_TIMEOUT = 3600
 
 LDAP_URI = "ldaps://ldap.example.com"
-LDAP_BASE = "ou=people,dc=example,dc=com"
+LDAP_BASE = "dc=example,dc=com"
+
+USER_DN = "cn={user},ou=people,dc=example,dc=com"
 
 ADMINS = [ "cn=admin,ou=people,dc=example,dc=com" ]
 
-CREATE_DN = "cn={user},ou=people,dc=example,dc=com"
 CREATE_ATTRS = {
 	'objectClass' : ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount'],
 	'cn' : '{user}',

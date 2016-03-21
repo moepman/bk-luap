@@ -85,7 +85,7 @@ def create():
 				'gn' : form.gn.data,
 				'sn' : form.sn.data,
 			}
-			dn = app.config.get('CREATE_DN').format(**d)
+			dn = app.config.get('USER_DN').format(**d)
 			attrs = {}
 			for k,v in app.config.get('CREATE_ATTRS').iteritems():
 				if type(v) == str:
@@ -138,7 +138,11 @@ def login():
 	form = LoginForm()
 
 	if form.validate_on_submit():
-		user = 'cn=' + form.user.data + ',' + app.config.get('LDAP_BASE','')
+		user = "" 
+		if form.user.data.endswith(app.config.get('LDAP_BASE','')):
+			user = form.user.data
+		else:
+			user = app.config.get('USER_DN').format(user=form.user.data)
 		pswd = form.pswd.data
 		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
 		try:
