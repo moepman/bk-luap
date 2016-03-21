@@ -1,6 +1,9 @@
 {% from "_helpers.html" import render_field %}
 {% extends "_base.html" %}
 {% block content %}
+      <div class="page-header">
+          <h1>Login</h1>
+      </div>
       <form class="form-horizontal" method="POST">
         {{ form.hidden_tag() }}
         {{ render_field(form.user) }}

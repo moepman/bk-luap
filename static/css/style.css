@@ -1,14 +1,14 @@
+* {
+  box-shadow: none!important;
+  border-radius: 0!important;
+}
+
 body {
   padding-top: 20px;
   padding-bottom: 20px;
 }
 
-.navbar {
-  margin-bottom: 20px;
-}
-
-.form-login {
-  max-width: 330px;
-  padding: 15px;
+.logo {
+  max-width: 300px;
   margin: 0 auto;
 }
