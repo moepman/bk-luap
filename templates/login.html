@@ -1,4 +1,4 @@
-{% from "_helpers.html" import render_field %}
+{% from "_helpers.html" import render_button, render_field %}
 {% extends "_base.html" %}
 {% block content %}
       <div class="page-header">
@@ -8,6 +8,6 @@
         {{ form.hidden_tag() }}
         {{ render_field(form.user) }}
         {{ render_field(form.pswd) }}
-        <div class="form-group"><div class="col-sm-offset-2 col-sm-10">{{ form.submit(class_="btn btn-primary") }}</div></div>
+        {{ render_button(form.submit) }}
       </form>
 {% endblock %}
