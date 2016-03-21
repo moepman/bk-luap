@@ -5,11 +5,11 @@ SESSION_TIMEOUT = 3600
 LDAP_URI = "ldaps://ldap.example.com"
 LDAP_BASE = "dc=example,dc=com"
 
-USER_DN = "cn={user},ou=people,dc=example,dc=com"
-
 ADMINS = [ "cn=admin,ou=people,dc=example,dc=com" ]
 
-CREATE_ATTRS = {
+USER_DN = "cn={user},ou=people,dc=example,dc=com"
+
+USER_ATTRS = {
 	'objectClass' : ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount'],
 	'cn' : '{user}',
 	'givenName' : '{gn}',
@@ -20,6 +20,8 @@ CREATE_ATTRS = {
 	'uidNumber' : '{uid}',
 	'gidNumber' : '1000'
 }
+
+GROUP_DN = 'cn=user,ou=Groups,dc=binary-kitchen,dc=de'
 
 REDIS_HOST = "127.0.0.1"
 REDIS_PSWD = "foobared"

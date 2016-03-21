@@ -85,16 +85,23 @@ def create():
 				'gn' : form.gn.data,
 				'sn' : form.sn.data,
 			}
-			dn = app.config.get('USER_DN').format(**d)
+
+			# add user
+			user_dn = app.config.get('USER_DN').format(**d)
 			attrs = {}
-			for k,v in app.config.get('CREATE_ATTRS').iteritems():
+			for k,v in app.config.get('USER_ATTRS').iteritems():
 				if type(v) == str:
 					attrs[k] = v.format(**d)
 				elif isinstance(v, list):
 					attrs[k] = []
 					for e in v:
 						attrs[k].append(e.format(**d))
-			l.add_s(dn, ldap.modlist.addModlist(attrs))
+			l.add_s(user_dn, ldap.modlist.addModlist(attrs))
+
+			# add user to group
+			group_dn = app.config.get('GROUP_DN').format(**d)
+			l.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data))])
+
 		except ldap.LDAPError as e:
 			l.unbind_s()
 			return render_template('error.html', message=e.message['desc'] + ": " + e.message['info'], nav=buildNav())
@@ -138,7 +145,7 @@ def login():
 	form = LoginForm()
 
 	if form.validate_on_submit():
-		user = "" 
+		user = ""
 		if form.user.data.endswith(app.config.get('LDAP_BASE','')):
 			user = form.user.data
 		else:
