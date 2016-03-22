@@ -55,6 +55,7 @@ def buildNav():
 	if isLoggedin():
 		nav.append('edit')
 		if isAdmin():
+			nav.append('list')
 			nav.append('create')
 		nav.append('logout')
 	else:
@@ -138,6 +139,17 @@ def edit():
 
 	form.user.data = user
 	return render_template('edit.html', form=form, nav=buildNav())
+
+
+@app.route('/list')
+def list():
+	if not isLoggedin():
+		return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
+
+	l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+	l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
+	sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', [''])
+	return render_template('list.html', users=sr, nav=buildNav())
 
 
 @app.route('/login', methods=['GET', 'POST'])
