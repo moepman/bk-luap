@@ -17,10 +17,10 @@ app.jinja_env.lstrip_blocks = True
 rdb = Redis(host=app.config.get('REDIS_HOST', '127.0.0.1'), password=app.config.get('REDIS_PSWD'))
 
 
-class ReadonlyStringField(StringField):
+class ReadOnlyField(StringField):
 	def __call__(self, *args, **kwargs):
 		kwargs.setdefault('readonly', True)
-		return super(ReadonlyStringField, self).__call__(*args, **kwargs)
+		return super(ReadOnlyField, self).__call__(*args, **kwargs)
 
 class CreateForm(Form):
 	user = StringField('Username', validators = [Required()])
@@ -32,7 +32,7 @@ class CreateForm(Form):
 	submit = SubmitField('Submit')
 
 class EditForm(Form):
-	user = ReadonlyStringField('Username')
+	user = ReadOnlyField('Username')
 	pwd1 = PasswordField('New Password', validators = [Required()])
 	pwd2 = PasswordField('New Password (repeat)', validators = [Required(), EqualTo('pwd1', "Passwords must match")])
 	submit = SubmitField('Submit')
