@@ -53,13 +53,13 @@ def isLoggedin():
 def buildNav():
 	nav = []
 	if isLoggedin():
-		nav.append('edit')
+		nav.append(('Edit own Account', 'edit'))
 		if isAdmin():
-			nav.append('list')
-			nav.append('create')
-		nav.append('logout')
+			nav.append(('List Accounts', 'list_users'))
+			nav.append(('Create Account', 'create'))
+		nav.append(('Logout', 'logout'))
 	else:
-		nav.append('login')
+		nav.append(('Login', 'login'))
 	return nav
 
 

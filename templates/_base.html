@@ -19,9 +19,9 @@
       </a>
       <hr/>
       <ul class="nav nav-pills nav-stacked">
-        {% for ni in nav %}
-        <li{%- if request.path == url_for(ni) %} class="active"{% endif %}>
-          <a href="{{ url_for(ni) }}">{{ ni|capitalize }}</a>
+        {% for ni, func in nav %}
+        <li{%- if request.path == url_for(func) %} class="active"{% endif %}>
+          <a href="{{ url_for(func) }}">{{ ni }}</a>
         </li>
         {% endfor %}
       </ul>
