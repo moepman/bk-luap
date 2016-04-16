@@ -105,7 +105,12 @@ def create():
 
 		except ldap.LDAPError as e:
 			l.unbind_s()
-			return render_template('error.html', message=e.message['desc'] + ": " + e.message['info'], nav=buildNav())
+			message = "LDAP Error"
+			if 'desc' in e.message:
+				message = message + " " + e.message['desc']
+			if 'info' in e.message:
+				message = message + ": " + e.message['info']
+			return render_template('error.html', message=message, nav=buildNav())
 		else:
 			l.unbind_s()
 			return render_template('success.html', message="User successfully created.", nav=buildNav())
