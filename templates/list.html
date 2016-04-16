@@ -5,11 +5,17 @@
       </div>
       <table class="table table-bordered table-striped">
         <thead>
-          <tr><td>DN</td></tr>
+          <tr>
+            <td>CN</td>
+            <td>DN</td>
+          </tr>
         </thead>
         <tbody>
-          {% for dn, _ in users %}
-          <tr><td>{{ dn }}</td></tr>
+          {% for dn, attr in users %}
+          <tr>
+            <td>{{ attr['cn'][0] }}</td>
+            <td>{{ dn }}</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>

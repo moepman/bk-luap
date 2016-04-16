@@ -91,7 +91,7 @@ def create():
 			user_dn = app.config.get('USER_DN').format(**d)
 			attrs = {}
 			for k,v in app.config.get('USER_ATTRS').iteritems():
-				if type(v) == str:
+				if isinstance(v, str):
 					attrs[k] = v.format(**d)
 				elif isinstance(v, list):
 					attrs[k] = []
@@ -142,13 +142,13 @@ def edit():
 
 
 @app.route('/list')
-def list():
+def list_users():
 	if not isLoggedin():
 		return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
 
 	l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
 	l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
-	sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', [''])
+	sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn'])
 	return render_template('list.html', users=sr, nav=buildNav())
 
 
