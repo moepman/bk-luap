@@ -4,6 +4,8 @@ from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf import Form
 import ldap
 import ldap.modlist
+import os
+from passlib.hash import ldap_salted_sha1
 from redis import Redis
 import uuid
 from wtforms.fields import IntegerField, PasswordField, SelectField, StringField, SubmitField
@@ -42,6 +44,9 @@ class LoginForm(Form):
 	pswd = PasswordField('Password', validators=[Required()])
 	submit = SubmitField('Login')
 
+
+def makeSecret(password):
+	return ldap_salted_sha1.encrypt(password)
 
 def isAdmin():
 	return isLoggedin() and rdb.hget(session['uuid'], 'user') in app.config.get('ADMINS', [])
@@ -85,6 +90,7 @@ def create():
 				'uid' : form.uid.data,
 				'gn' : form.gn.data,
 				'sn' : form.sn.data,
+				'pass' : makeSecret(form.pwd1.data)
 			}
 
 			# add user
