@@ -22,7 +22,7 @@ USER_ATTRS = {
 	'gidNumber' : '1000'
 }
 
-GROUP_DN = 'cn=user,ou=Groups,dc=binary-kitchen,dc=de'
+GROUP_DN = 'cn=user,ou=groups,dc=example,dc=com'
 
 REDIS_HOST = "127.0.0.1"
-REDIS_PSWD = "foobared"
+REDIS_PASSWD = "foobared"
