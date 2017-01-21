@@ -4,7 +4,6 @@ from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf import Form
 import ldap
 import ldap.modlist
-import os
 from passlib.hash import ldap_salted_sha1
 from redis import Redis
 import uuid
