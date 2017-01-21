@@ -18,6 +18,11 @@ app.jinja_env.lstrip_blocks = True
 
 rdb = Redis(host=app.config.get('REDIS_HOST', '127.0.0.1'), password=app.config.get('REDIS_PSWD'))
 
+ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
+ldap.set_option(ldap.OPT_REFERRALS, 0)
+if 'LDAP_CA' in app.config.keys():
+	ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, app.config.get('LDAP_CA'))
+
 
 class ReadOnlyField(StringField):
 	def __call__(self, *args, **kwargs):

@@ -2,6 +2,7 @@ DEBUG = True
 SECRET_KEY = "CHANGE!ME"
 SESSION_TIMEOUT = 3600
 
+LDAP_CA = "/etc/ldap/ssl/CA.crt"
 LDAP_URI = "ldaps://ldap.example.com"
 LDAP_BASE = "dc=example,dc=com"
 
