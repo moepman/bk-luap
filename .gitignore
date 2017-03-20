@@ -2,3 +2,5 @@
 config.cfg
 # uwsgi settings
 uwsgi.ini
+# virtual environment
+venv
