@@ -1,2 +1,4 @@
 # config file
 config.cfg
+# uwsgi settings
+uwsgi.ini

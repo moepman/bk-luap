@@ -1,0 +1,7 @@
+[uwsgi]
+socket = 127.0.0.1:5001
+#chroot = /path/to/dss/
+wsgi-file = dss.py
+callable = app
+processess = 4
+threads = 2
