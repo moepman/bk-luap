@@ -135,15 +135,14 @@ def edit():
 		return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
 
 	form = EditForm()
-	user = rdb.hget(session['uuid'], 'user')
+	creds = rdb.hgetall(session['uuid'])
 
 	if form.validate_on_submit():
-		opwd = rdb.hget(session['uuid'], 'pswd')
 		npwd = form.pwd1.data
 		l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
 		try:
-			l.simple_bind_s(user, opwd)
-			l.passwd_s(user, opwd, npwd)
+			l.simple_bind_s(creds['user'], creds['pswd'])
+			l.passwd_s(creds['user'], creds['pswd'], npwd)
 		except ldap.INVALID_CREDENTIALS as e:
 			form.user.errors.append(e.message['desc'])
 			l.unbind_s()
@@ -153,7 +152,7 @@ def edit():
 			l.unbind_s()
 			return render_template('success.html', message="User successfully edited.", nav=buildNav())
 
-	form.user.data = user
+	form.user.data = creds['user']
 	return render_template('edit.html', form=form, nav=buildNav())
 
 
