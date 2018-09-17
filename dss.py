@@ -184,7 +184,7 @@ def login():
 		try:
 			l.simple_bind_s(user, pswd)
 		except ldap.INVALID_CREDENTIALS as e:
-			form.pswd.errors.append(e.message['desc'])
+			form.pswd.errors.append('Invalid Credentials')
 			l.unbind_s()
 			return render_template('login.html', form=form, nav=buildNav())
 		l.unbind_s()
