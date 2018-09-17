@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-from flask import Flask, render_template, redirect, url_for, session
-from flask_wtf import Form
 import ldap
 import ldap.modlist
-from passlib.hash import ldap_salted_sha1
-from redis import Redis
 import uuid
+
+from flask import Flask, render_template, redirect, url_for, session
+from flask_wtf import Form
 from wtforms.fields import IntegerField, PasswordField, SelectField, StringField, SubmitField
 from wtforms.validators import EqualTo, Required
+
+from passlib.hash import ldap_salted_sha1
+from redis import Redis
 
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
