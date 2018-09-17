@@ -7,7 +7,7 @@ import uuid
 from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf import Form
 from wtforms.fields import IntegerField, PasswordField, SelectField, StringField, SubmitField
-from wtforms.validators import EqualTo, Required
+from wtforms.validators import EqualTo, DataRequired
 
 from passlib.hash import ldap_salted_sha1
 from redis import Redis
@@ -31,23 +31,23 @@ class ReadOnlyField(StringField):
 		return super(ReadOnlyField, self).__call__(*args, **kwargs)
 
 class CreateForm(Form):
-	user = StringField('Username', validators = [Required()])
-	uid = IntegerField('User ID', validators = [Required()])
-	gn = StringField('Given Name', validators = [Required()])
-	sn = StringField('Family Name', validators = [Required()])
-	pwd1 = PasswordField('Password', validators = [Required()])
-	pwd2 = PasswordField('Password (repeat)', validators = [Required(), EqualTo('pwd1', "Passwords must match")])
+	user = StringField('Username', validators = [DataRequired()])
+	uid = IntegerField('User ID', validators = [DataRequired()])
+	gn = StringField('Given Name', validators = [DataRequired()])
+	sn = StringField('Family Name', validators = [DataRequired()])
+	pwd1 = PasswordField('Password', validators = [DataRequired()])
+	pwd2 = PasswordField('Password (repeat)', validators = [DataRequired(), EqualTo('pwd1', "Passwords must match")])
 	submit = SubmitField('Submit')
 
 class EditForm(Form):
 	user = ReadOnlyField('Username')
-	pwd1 = PasswordField('New Password', validators = [Required()])
-	pwd2 = PasswordField('New Password (repeat)', validators = [Required(), EqualTo('pwd1', "Passwords must match")])
+	pwd1 = PasswordField('New Password', validators = [DataRequired()])
+	pwd2 = PasswordField('New Password (repeat)', validators = [DataRequired(), EqualTo('pwd1', "Passwords must match")])
 	submit = SubmitField('Submit')
 
 class LoginForm(Form):
-	user = StringField('Username', validators=[Required()])
-	pswd = PasswordField('Password', validators=[Required()])
+	user = StringField('Username', validators=[DataRequired()])
+	pswd = PasswordField('Password', validators=[DataRequired()])
 	submit = SubmitField('Login')
 
 
