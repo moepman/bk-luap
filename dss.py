@@ -17,7 +17,7 @@ app.config.from_pyfile('config.cfg')
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
-rdb = Redis(host=app.config.get('REDIS_HOST', '127.0.0.1'), password=app.config.get('REDIS_PASSWD'))
+rdb = Redis(host=app.config.get('REDIS_HOST', '127.0.0.1'), password=app.config.get('REDIS_PASSWD'), decode_responses=True)
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
 ldap.set_option(ldap.OPT_REFERRALS, 0)
