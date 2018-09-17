@@ -173,7 +173,7 @@ def login():
 	form = LoginForm()
 
 	if form.validate_on_submit():
-		user = ""
+		user = ''
 		if form.user.data.endswith(app.config.get('LDAP_BASE','')):
 			user = form.user.data
 		else:
