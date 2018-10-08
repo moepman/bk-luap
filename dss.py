@@ -5,7 +5,7 @@ import ldap.modlist
 import uuid
 
 from flask import Flask, render_template, redirect, url_for, session
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms.fields import IntegerField, PasswordField, SelectField, StringField, SubmitField
 from wtforms.validators import EqualTo, DataRequired
 
@@ -30,7 +30,7 @@ class ReadOnlyField(StringField):
 		kwargs.setdefault('readonly', True)
 		return super(ReadOnlyField, self).__call__(*args, **kwargs)
 
-class CreateForm(Form):
+class CreateForm(FlaskForm):
 	user = StringField('Username', validators = [DataRequired()])
 	uid = IntegerField('User ID', validators = [DataRequired()])
 	gn = StringField('Given Name', validators = [DataRequired()])
@@ -39,13 +39,13 @@ class CreateForm(Form):
 	pwd2 = PasswordField('Password (repeat)', validators = [DataRequired(), EqualTo('pwd1', "Passwords must match")])
 	submit = SubmitField('Submit')
 
-class EditForm(Form):
+class EditForm(FlaskForm):
 	user = ReadOnlyField('Username')
 	pwd1 = PasswordField('New Password', validators = [DataRequired()])
 	pwd2 = PasswordField('New Password (repeat)', validators = [DataRequired(), EqualTo('pwd1', "Passwords must match")])
 	submit = SubmitField('Submit')
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
 	user = StringField('Username', validators=[DataRequired()])
 	pswd = PasswordField('Password', validators=[DataRequired()])
 	submit = SubmitField('Login')
