@@ -6,11 +6,11 @@ TBA
 
 ## Requirements
 
-* passlib >= 1.6.0
-* py-flask >= 0.10
-* py-flask-wtf >= 0.10
-* py-ldap >= 2.4.15
-* py-redis >= 2.10
+* passlib >= 1.7.0
+* flask >= 0.12.1
+* flask-wtf >= 0.14.2
+* ldap >= 2.4.25
+* redis >= 2.10.5
 
 ## uWSGI
 
