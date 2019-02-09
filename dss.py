@@ -53,23 +53,23 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-def makeSecret(password):
+def make_secret(password):
     return ldap_salted_sha1.encrypt(password)
 
 
-def isAdmin():
-    return isLoggedin() and rdb.hget(session['uuid'], 'user') in app.config.get('ADMINS', [])
+def is_admin():
+    return is_loggedin() and rdb.hget(session['uuid'], 'user') in app.config.get('ADMINS', [])
 
 
-def isLoggedin():
+def is_loggedin():
     return 'uuid' in session and rdb.exists(session['uuid'])
 
 
-def buildNav():
+def build_nav():
     nav = []
-    if isLoggedin():
+    if is_loggedin():
         nav.append(('Edit own Account', 'edit'))
-        if isAdmin():
+        if is_admin():
             nav.append(('List Accounts', 'list_users'))
             nav.append(('Create Account', 'create'))
         nav.append(('Logout', 'logout'))
@@ -80,13 +80,13 @@ def buildNav():
 
 @app.route('/')
 def index():
-    return render_template('index.html', nav=buildNav())
+    return render_template('index.html', nav=build_nav())
 
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
-    if not isLoggedin():
-        return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
+    if not is_loggedin():
+        return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
 
     form = CreateForm()
 
@@ -99,7 +99,7 @@ def create():
                 'uid': form.uid.data,
                 'gn': form.gn.data,
                 'sn': form.sn.data,
-                'pass': makeSecret(form.pwd1.data)
+                'pass': make_secret(form.pwd1.data)
             }
 
             # add user
@@ -125,18 +125,18 @@ def create():
                 message = message + " " + e.message['desc']
             if 'info' in e.message:
                 message = message + ": " + e.message['info']
-            return render_template('error.html', message=message, nav=buildNav())
+            return render_template('error.html', message=message, nav=build_nav())
         else:
             l.unbind_s()
-            return render_template('success.html', message="User successfully created.", nav=buildNav())
+            return render_template('success.html', message="User successfully created.", nav=build_nav())
 
-    return render_template('create.html', form=form, nav=buildNav())
+    return render_template('create.html', form=form, nav=build_nav())
 
 
 @app.route('/edit', methods=['GET', 'POST'])
 def edit():
-    if not isLoggedin():
-        return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
+    if not is_loggedin():
+        return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
 
     form = EditForm()
     creds = rdb.hgetall(session['uuid'])
@@ -150,25 +150,25 @@ def edit():
         except ldap.INVALID_CREDENTIALS as e:
             form.user.errors.append(e.message['desc'])
             l.unbind_s()
-            return render_template('edit.html', form=form, nav=buildNav())
+            return render_template('edit.html', form=form, nav=build_nav())
         else:
             rdb.hset(session['uuid'], 'pswd', npwd)
             l.unbind_s()
-            return render_template('success.html', message="User successfully edited.", nav=buildNav())
+            return render_template('success.html', message="User successfully edited.", nav=build_nav())
 
     form.user.data = creds['user']
-    return render_template('edit.html', form=form, nav=buildNav())
+    return render_template('edit.html', form=form, nav=build_nav())
 
 
 @app.route('/list')
 def list_users():
-    if not isLoggedin():
-        return render_template('error.html', message="You are not logged in. Please log in first.", nav=buildNav())
+    if not is_loggedin():
+        return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
 
     l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
     l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
     sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn'])
-    return render_template('list.html', users=sr, nav=buildNav())
+    return render_template('list.html', users=sr, nav=build_nav())
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -184,10 +184,10 @@ def login():
         l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
         try:
             l.simple_bind_s(user, pswd)
-        except ldap.INVALID_CREDENTIALS as e:
+        except ldap.INVALID_CREDENTIALS:
             form.pswd.errors.append('Invalid Credentials')
             l.unbind_s()
-            return render_template('login.html', form=form, nav=buildNav())
+            return render_template('login.html', form=form, nav=build_nav())
         l.unbind_s()
 
         session['uuid'] = str(uuid.uuid4())
@@ -197,7 +197,7 @@ def login():
         rdb.expire(session['uuid'], app.config.get('SESSION_TIMEOUT', 3600))
 
         return redirect(url_for('index'))
-    return render_template('login.html', form=form, nav=buildNav())
+    return render_template('login.html', form=form, nav=build_nav())
 
 
 @app.route('/logout')
