@@ -106,13 +106,13 @@ def create():
             # add user
             user_dn = app.config.get('USER_DN').format(**d)
             attrs = {}
-            for k, v in app.config.get('USER_ATTRS').iteritems():
+            for k, v in app.config.get('USER_ATTRS').items():
                 if isinstance(v, str):
-                    attrs[k] = v.format(**d)
+                    attrs[k] = v.format(**d).encode()
                 elif isinstance(v, list):
                     attrs[k] = []
                     for e in v:
-                        attrs[k].append(e.format(**d))
+                        attrs[k].append(e.format(**d).encode())
             l.add_s(user_dn, ldap.modlist.addModlist(attrs))
 
             # add user to group
@@ -122,10 +122,10 @@ def create():
         except ldap.LDAPError as e:
             l.unbind_s()
             message = "LDAP Error"
-            if 'desc' in e.message:
-                message = message + " " + e.message['desc']
-            if 'info' in e.message:
-                message = message + ": " + e.message['info']
+            if 'desc' in e.args[0]:
+                message = message + " " + e.args[0]['desc']
+            if 'info' in e.args[0]:
+                message = message + ": " + e.args[0]['info']
             return render_template('error.html', message=message, nav=build_nav())
         else:
             l.unbind_s()
@@ -149,7 +149,7 @@ def edit():
             l.simple_bind_s(creds['user'], creds['pswd'])
             l.passwd_s(creds['user'], creds['pswd'], npwd)
         except ldap.INVALID_CREDENTIALS as e:
-            form.user.errors.append(e.message['desc'])
+            form.user.errors.append('Invalid credentials')
             l.unbind_s()
             return render_template('edit.html', form=form, nav=build_nav())
         else:
@@ -187,7 +187,7 @@ def login():
         try:
             l.simple_bind_s(user, pswd)
         except ldap.INVALID_CREDENTIALS:
-            form.pswd.errors.append('Invalid Credentials')
+            form.pswd.errors.append('Invalid credentials')
             l.unbind_s()
             return render_template('login.html', form=form, nav=build_nav())
         l.unbind_s()
