@@ -1,19 +1,19 @@
 {% extends "_base.html" %}
 {% block content %}
       <div class="page-header">
-        <h1>List users</h1>
+        <h1>List Accounts</h1>
       </div>
       <table class="table table-bordered table-striped">
         <thead>
           <tr>
-            <td>CN</td>
-            <td>DN</td>
+            <td>common name</td>
+            <td>distinguished name</td>
           </tr>
         </thead>
         <tbody>
-          {% for dn, attr in users %}
+          {% for cn, dn in accounts %}
           <tr>
-            <td>{{ attr['cn'][0] }}</td>
+            <td>{{ cn }}</td>
             <td>{{ dn }}</td>
           </tr>
           {% endfor %}

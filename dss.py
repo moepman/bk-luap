@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import uuid
 
@@ -168,7 +169,8 @@ def list_users():
     l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
     l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
     sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn'])
-    return render_template('list.html', users=sr, nav=build_nav())
+    accounts = [(attr['cn'][0].decode(errors='ignore'), dn) for dn, attr in sr]
+    return render_template('list.html', accounts=accounts, nav=build_nav())
 
 
 @app.route('/login', methods=['GET', 'POST'])
