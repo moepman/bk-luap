@@ -1,7 +1,10 @@
 [uwsgi]
 socket = 127.0.0.1:5001
-#chroot = /path/to/dss/
+#chdir = /path/to/dss/
+plugin = python3
 wsgi-file = dss.py
 callable = app
+#uid = www-data
+#gid = www-data
 processess = 4
 threads = 2

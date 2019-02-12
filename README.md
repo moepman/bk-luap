@@ -14,7 +14,7 @@ TBA
 
 ## uWSGI
 
-To use dss with uWSGI create a file called uwsgi.ini from the provided example and change the socket and optinally the chroot setting. You can use `/usr/bin/uwsgi --ini /path/to/dss/uwsgi.ini` to start your instance.
+To use dss with uWSGI create a file called uwsgi.ini from the provided example and change the socket and optinally the chdir,uid and gid settings. You can use `/usr/bin/uwsgi --ini /path/to/dss/uwsgi.ini` to start your instance.
 
 ## Misc
 
