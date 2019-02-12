@@ -8,8 +8,8 @@ TBA
 
 * passlib >= 1.7.0
 * flask >= 0.12.1
-* flask-wtf >= 0.14.2
-* ldap >= 2.4.25
+* flask-wtf >= 0.12
+* pyldap >= 2.4.25
 * redis >= 2.10.5
 
 ## uWSGI

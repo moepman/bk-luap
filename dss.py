@@ -6,7 +6,7 @@ import uuid
 import ldap
 import ldap.modlist
 from flask import Flask, render_template, redirect, url_for, session
-from flask_wtf import FlaskForm
+from flask_wtf import Form
 from passlib.hash import ldap_salted_sha1
 from redis import Redis
 from wtforms.fields import IntegerField, PasswordField, StringField, SubmitField
@@ -31,7 +31,7 @@ class ReadOnlyField(StringField):
         return super(ReadOnlyField, self).__call__(*args, **kwargs)
 
 
-class CreateForm(FlaskForm):
+class CreateForm(Form):
     user = StringField('Username', validators=[DataRequired()])
     uid = IntegerField('User ID', validators=[DataRequired()])
     gn = StringField('Given Name', validators=[DataRequired()])
@@ -41,14 +41,14 @@ class CreateForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-class EditForm(FlaskForm):
+class EditForm(Form):
     user = ReadOnlyField('Username')
     pwd1 = PasswordField('New Password', validators=[DataRequired()])
     pwd2 = PasswordField('New Password (repeat)', validators=[DataRequired(), EqualTo('pwd1', "Passwords must match")])
     submit = SubmitField('Submit')
 
 
-class LoginForm(FlaskForm):
+class LoginForm(Form):
     user = StringField('Username', validators=[DataRequired()])
     pswd = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
