@@ -148,7 +148,7 @@ def edit():
         try:
             l.simple_bind_s(creds['user'], creds['pswd'])
             l.passwd_s(creds['user'], creds['pswd'], npwd)
-        except ldap.INVALID_CREDENTIALS as e:
+        except ldap.INVALID_CREDENTIALS:
             form.user.errors.append('Invalid credentials')
             l.unbind_s()
             return render_template('edit.html', form=form, nav=build_nav())
