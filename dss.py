@@ -117,7 +117,7 @@ def create():
 
             # add user to group
             group_dn = app.config.get('GROUP_DN').format(**d)
-            l.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data))])
+            l.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data).encode())])
 
         except ldap.LDAPError as e:
             l.unbind_s()
