@@ -89,6 +89,9 @@ def create():
     if not is_loggedin():
         return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
 
+    if not is_admin():
+        return render_template('error.html', message="You do not have administrative privileges. Please log in using an administrative account.", nav=build_nav())
+
     form = CreateForm()
 
     if form.validate_on_submit():
@@ -165,6 +168,9 @@ def edit():
 def list_users():
     if not is_loggedin():
         return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
+
+    if not is_admin():
+        return render_template('error.html', message="You do not have administrative privileges. Please log in using an administrative account.", nav=build_nav())
 
     l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
     l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
