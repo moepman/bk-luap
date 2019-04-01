@@ -25,12 +25,6 @@ if 'LDAP_CA' in app.config.keys():
     ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, app.config.get('LDAP_CA'))
 
 
-class ReadOnlyField(StringField):
-    def __call__(self, *args, **kwargs):
-        kwargs.setdefault('readonly', True)
-        return super(ReadOnlyField, self).__call__(*args, **kwargs)
-
-
 class CreateForm(Form):
     user = StringField('Username', validators=[DataRequired()])
     uid = IntegerField('User ID', validators=[DataRequired()])
@@ -42,7 +36,7 @@ class CreateForm(Form):
 
 
 class EditForm(Form):
-    user = ReadOnlyField('Username')
+    user = StringField('Username', render_kw={'readonly': True})
     pwd1 = PasswordField('New Password', validators=[DataRequired()])
     pwd2 = PasswordField('New Password (repeat)', validators=[DataRequired(), EqualTo('pwd1', "Passwords must match")])
     submit = SubmitField('Submit')
