@@ -168,8 +168,8 @@ def list_users():
 
     l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
     l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
-    sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn'])
-    accounts = [(attr['cn'][0].decode(errors='ignore'), dn) for dn, attr in sr]
+    sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn', 'uidNumber'])
+    accounts = [(attr['cn'][0].decode(errors='ignore'), attr['uidNumber'][0].decode(errors='ignore'), dn) for dn, attr in sr]
     return render_template('list.html', accounts=accounts, nav=build_nav())
 
 

@@ -7,13 +7,15 @@
         <thead>
           <tr>
             <td>common name</td>
+            <td>UID number</td>
             <td>distinguished name</td>
           </tr>
         </thead>
         <tbody>
-          {% for cn, dn in accounts %}
+          {% for cn, uin, dn in accounts %}
           <tr>
             <td>{{ cn }}</td>
+            <td>{{ uin }}</td>
             <td>{{ dn }}</td>
           </tr>
           {% endfor %}
