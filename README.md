@@ -2,15 +2,15 @@
 
 ## Overview
 
-TBA
+This Directory Self-Service is intended as a portal that allow Users to change their LDAP passwords and also supports the creations of new users based on a simple template.
 
 ## Requirements
 
+* Flask >= 1.0.0
+* Flask-WTF >= 0.14
 * passlib >= 1.7.0
-* flask >= 0.12.1
-* flask-wtf >= 0.12
-* pyldap >= 2.4.25
-* redis >= 2.10.5
+* python-ldap >= 3.1.0
+* redis >= 3.1.0
 
 ## uWSGI
 
