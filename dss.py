@@ -84,14 +84,15 @@ def create():
         return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
 
     if not is_admin():
-        return render_template('error.html', message="You do not have administrative privileges. Please log in using an administrative account.", nav=build_nav())
+        return render_template('error.html', message="You do not have administrative privileges. Please log in using an administrative account.",
+                               nav=build_nav())
 
     form = CreateForm()
 
     if form.validate_on_submit():
-        l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+        ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
         try:
-            l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
+            ldap_connection.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
             d = {
                 'user': form.user.data,
                 'uid': form.uid.data,
@@ -110,14 +111,14 @@ def create():
                     attrs[k] = []
                     for e in v:
                         attrs[k].append(e.format(**d).encode())
-            l.add_s(user_dn, ldap.modlist.addModlist(attrs))
+            ldap_connection.add_s(user_dn, ldap.modlist.addModlist(attrs))
 
             # add user to group
             group_dn = app.config.get('GROUP_DN').format(**d)
-            l.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data).encode())])
+            ldap_connection.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data).encode())])
 
         except ldap.LDAPError as e:
-            l.unbind_s()
+            ldap_connection.unbind_s()
             message = "LDAP Error"
             if 'desc' in e.args[0]:
                 message = message + " " + e.args[0]['desc']
@@ -125,7 +126,7 @@ def create():
                 message = message + ": " + e.args[0]['info']
             return render_template('error.html', message=message, nav=build_nav())
         else:
-            l.unbind_s()
+            ldap_connection.unbind_s()
             return render_template('success.html', message="User successfully created.", nav=build_nav())
 
     return render_template('create.html', form=form, nav=build_nav())
@@ -141,17 +142,17 @@ def edit():
 
     if form.validate_on_submit():
         npwd = form.pwd1.data
-        l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+        ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
         try:
-            l.simple_bind_s(creds['user'], creds['pswd'])
-            l.passwd_s(creds['user'], creds['pswd'], npwd)
+            ldap_connection.simple_bind_s(creds['user'], creds['pswd'])
+            ldap_connection.passwd_s(creds['user'], creds['pswd'], npwd)
         except ldap.INVALID_CREDENTIALS:
             form.user.errors.append('Invalid credentials')
-            l.unbind_s()
+            ldap_connection.unbind_s()
             return render_template('edit.html', form=form, nav=build_nav())
         else:
             rdb.hset(session['uuid'], 'pswd', npwd)
-            l.unbind_s()
+            ldap_connection.unbind_s()
             return render_template('success.html', message="User successfully edited.", nav=build_nav())
 
     form.user.data = creds['user']
@@ -164,11 +165,12 @@ def list_users():
         return render_template('error.html', message="You are not logged in. Please log in first.", nav=build_nav())
 
     if not is_admin():
-        return render_template('error.html', message="You do not have administrative privileges. Please log in using an administrative account.", nav=build_nav())
+        return render_template('error.html', message="You do not have administrative privileges. Please log in using an administrative account.",
+                               nav=build_nav())
 
-    l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
-    l.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
-    sr = l.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn', 'uidNumber'])
+    ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+    ldap_connection.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
+    sr = ldap_connection.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, '(objectClass=posixAccount)', ['cn', 'uidNumber'])
     accounts = [(attr['cn'][0].decode(errors='ignore'), attr['uidNumber'][0].decode(errors='ignore'), dn) for dn, attr in sr]
     return render_template('list.html', accounts=accounts, nav=build_nav())
 
@@ -183,14 +185,14 @@ def login():
         else:
             user = app.config.get('USER_DN').format(user=form.user.data)
         pswd = form.pswd.data
-        l = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+        ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
         try:
-            l.simple_bind_s(user, pswd)
+            ldap_connection.simple_bind_s(user, pswd)
         except ldap.INVALID_CREDENTIALS:
             form.pswd.errors.append('Invalid credentials')
-            l.unbind_s()
+            ldap_connection.unbind_s()
             return render_template('login.html', form=form, nav=build_nav())
-        l.unbind_s()
+        ldap_connection.unbind_s()
 
         session['uuid'] = str(uuid.uuid4())
         credentials = {'user': user, 'pswd': pswd}
