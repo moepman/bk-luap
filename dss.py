@@ -93,7 +93,7 @@ def create():
         ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
         try:
             ldap_connection.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
-            d = {
+            user_data = {
                 'user': form.user.data,
                 'uid': form.uid.data,
                 'gn': form.gn.data,
@@ -102,28 +102,28 @@ def create():
             }
 
             # add user
-            user_dn = app.config.get('USER_DN').format(**d)
+            user_dn = app.config.get('USER_DN').format(**user_data)
             attrs = {}
-            for k, v in app.config.get('USER_ATTRS').items():
-                if isinstance(v, str):
-                    attrs[k] = v.format(**d).encode()
-                elif isinstance(v, list):
-                    attrs[k] = []
-                    for e in v:
-                        attrs[k].append(e.format(**d).encode())
+            for key, value in app.config.get('USER_ATTRS').items():
+                if isinstance(value, str):
+                    attrs[key] = value.format(**user_data).encode()
+                elif isinstance(value, list):
+                    attrs[key] = []
+                    for element in value:
+                        attrs[key].append(element.format(**user_data).encode())
             ldap_connection.add_s(user_dn, ldap.modlist.addModlist(attrs))
 
             # add user to group
-            group_dn = app.config.get('GROUP_DN').format(**d)
+            group_dn = app.config.get('GROUP_DN').format(**user_data)
             ldap_connection.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data).encode())])
 
-        except ldap.LDAPError as e:
+        except ldap.LDAPError as err:
             ldap_connection.unbind_s()
             message = "LDAP Error"
-            if 'desc' in e.args[0]:
-                message = message + " " + e.args[0]['desc']
-            if 'info' in e.args[0]:
-                message = message + ": " + e.args[0]['info']
+            if 'desc' in err.args[0]:
+                message = message + " " + err.args[0]['desc']
+            if 'info' in err.args[0]:
+                message = message + ": " + err.args[0]['info']
             return render_template('error.html', message=message, nav=build_nav())
         else:
             ldap_connection.unbind_s()
