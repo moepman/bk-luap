@@ -9,7 +9,7 @@ from flask import Flask, render_template, redirect, url_for, session
 from flask_wtf import FlaskForm
 from passlib.hash import ldap_salted_sha1
 from redis import Redis
-from wtforms.fields import IntegerField, PasswordField, StringField, SubmitField
+from wtforms.fields import IntegerField, PasswordField, StringField, SelectField, SubmitField
 from wtforms.validators import EqualTo, DataRequired
 
 app = Flask(__name__)
@@ -32,6 +32,7 @@ class CreateForm(FlaskForm):
     sn = StringField('Family Name', validators=[DataRequired()])
     pwd1 = PasswordField('Password', validators=[DataRequired()])
     pwd2 = PasswordField('Password (repeat)', validators=[DataRequired(), EqualTo('pwd1', "Passwords must match")])
+    group_pri = SelectField('Primary group', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
@@ -73,6 +74,14 @@ def build_nav():
     return nav
 
 
+def get_groups():
+    ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
+    ldap_connection.simple_bind_s(rdb.hget(session['uuid'], 'user'), rdb.hget(session['uuid'], 'pswd'))
+    sr = ldap_connection.search_s(app.config.get('LDAP_BASE'), ldap.SCOPE_SUBTREE, app.config.get('GROUP_FILTER'), ['cn', 'gidNumber'])
+    groups = {attr['cn'][0].decode(errors='ignore'): {'gidNumber': attr['gidNumber'][0].decode(errors='ignore'), 'dn': dn} for dn, attr in sr}
+    return groups
+
+
 @app.route('/')
 def index():
     return render_template('index.html', nav=build_nav())
@@ -88,6 +97,8 @@ def create():
                                nav=build_nav())
 
     form = CreateForm()
+    groups = get_groups()
+    form.group_pri.choices = [(group, group) for group in groups.keys()]
 
     if form.validate_on_submit():
         ldap_connection = ldap.initialize(app.config.get('LDAP_URI', 'ldaps://127.0.0.1'))
@@ -98,7 +109,8 @@ def create():
                 'uid': form.uid.data,
                 'gn': form.gn.data,
                 'sn': form.sn.data,
-                'pass': make_secret(form.pwd1.data)
+                'pass': make_secret(form.pwd1.data),
+                'gid': groups[form.group_pri.data]['gidNumber']
             }
 
             # add user
@@ -114,7 +126,7 @@ def create():
             ldap_connection.add_s(user_dn, ldap.modlist.addModlist(attrs))
 
             # add user to group
-            group_dn = app.config.get('GROUP_DN').format(**user_data)
+            group_dn = groups[form.group_pri.data]['dn']
             ldap_connection.modify_s(group_dn, [(ldap.MOD_ADD, 'memberUid', str(form.user.data).encode())])
 
         except ldap.LDAPError as err:

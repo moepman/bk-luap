@@ -19,10 +19,10 @@ USER_ATTRS = {
 	'sn' : '{sn}',
 	'uid' : '{user}',
 	'uidNumber' : '{uid}',
-	'gidNumber' : '1000'
+	'gidNumber' : '{gid}'
 }
 
-GROUP_DN = 'cn=user,ou=groups,dc=example,dc=com'
+GROUP_FILTER = "(objectClass=posixGroup)"
 
 REDIS_HOST = "127.0.0.1"
 REDIS_PASSWD = "foobared"
