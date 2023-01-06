@@ -13,13 +13,15 @@ USER_DN = "cn={user},ou=people,dc=example,dc=com"
 USER_ATTRS = {
 	'objectClass' : ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount'],
 	'cn' : '{user}',
+	'gidNumber' : '{gid}',
 	'givenName' : '{gn}',
 	'homeDirectory' : '/home/{user}',
 	'loginShell' : '/bin/bash',
+	'mail' : '{user}@example.com',
 	'sn' : '{sn}',
 	'uid' : '{user}',
 	'uidNumber' : '{uid}',
-	'gidNumber' : '{gid}'
+	'userPassword' : '{pass}'
 }
 
 GROUP_FILTER = "(objectClass=posixGroup)"
