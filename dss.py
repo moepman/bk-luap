@@ -37,7 +37,7 @@ class CreateForm(FlaskForm):
 
 
 class EditForm(FlaskForm):
-    user = StringField('Username', render_kw={'readonly': True})
+    user = StringField('Username', render_kw={'disabled': True})
     pwd1 = PasswordField('New Password', validators=[DataRequired()])
     pwd2 = PasswordField('New Password (repeat)', validators=[DataRequired(), EqualTo('pwd1', "Passwords must match")])
     submit = SubmitField('Submit')

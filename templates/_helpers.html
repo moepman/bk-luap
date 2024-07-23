@@ -1,18 +1,20 @@
 {% macro render_field(field) %}
-<div class="form-group row mb-3">
+<div class="row mb-3">
   {{ field.label(class_="col-form-label col-sm-3 text-right") }}
   {% if field.errors %}{% set class_extras = " is-invalid" %}{% else %}{% set class_extras = "" %}{% endif %}
+  {% if field.type == "SelectField" %}{% set class_extras = class_extras + " form-select" %}{% endif %}
   <div class="col-sm-5">{{ field(class_="form-control" + class_extras) }}
   {% if field.errors %}
-  <div class="invalid-feedback">
-  {% for error in field.errors %}
-    {{ error }}
-  {% endfor %}
-  </div>
+    <div class="invalid-feedback">
+    {% for error in field.errors %}
+      {{ error }}
+    {% endfor %}
+    </div>
   {% endif %}
-</div></div>
+  </div>
+</div>
 {%- endmacro %}
 
 {% macro render_button(button) %}
-<div class="form-group row"><div class="offset-sm-3 col-sm-5">{{ button(class_="btn btn-primary") }}</div></div>
+<div class="row"><div class="offset-sm-3 col-sm-5">{{ button(class_="btn btn-primary") }}</div></div>
 {%- endmacro %}
